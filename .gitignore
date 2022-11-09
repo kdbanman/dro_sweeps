@@ -1,5 +1,7 @@
 # Project-specific ignores
 
+.vscode/
+
 activate
 slurm-*
 
