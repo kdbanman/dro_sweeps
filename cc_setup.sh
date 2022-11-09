@@ -1,2 +1,2 @@
 module load python/3.9
-source /env/bin/activate
+source env/bin/activate
