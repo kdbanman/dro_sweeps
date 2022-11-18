@@ -96,12 +96,31 @@ def main():
 
         plt.figure(dpi=200)
         # plt.scatter(X_1[:, 0], Y_1, alpha=0.01, linewidths=0, s=2)
-        plt.plot(domain[:, 0], dg.compute_outputs(domain, population_1['weights']), color='blue', linewidth=1, linestyle='--')
+        plt.plot(
+            domain[:, 0],
+            dg.compute_outputs(domain, population_1['weights']),
+            color='blue',
+            linewidth=1,
+            linestyle='--',
+        )
         # plt.scatter(X_2[:, 0], Y_2, alpha=0.01, linewidths=0, s=2)
-        plt.plot(domain[:, 0], dg.compute_outputs(domain, population_2['weights']), color='orange', linewidth=1, linestyle='--')
+        plt.plot(
+            domain[:, 0],
+            dg.compute_outputs(domain, population_2['weights']),
+            color='orange',
+            linewidth=1,
+            linestyle='--',
+        )
 
         for cvar_alpha, weights in zip(cvar_alphas, results[batch_size]['averaged_weights']):
-            plt.plot(domain[:, 0], dg.compute_outputs(domain, weights), alpha=0.7, label=f'$\\alpha={cvar_alpha:0.4f}$', color=plt.cm.viridis((4 + jnp.log(cvar_alpha) / jnp.log(10)) / 4), linewidth=1)
+            plt.plot(
+                domain[:, 0],
+                dg.compute_outputs(domain, weights),
+                alpha=0.7,
+                label=f'$\\alpha={cvar_alpha:0.4f}$',
+                color=plt.cm.viridis((4 + jnp.log(cvar_alpha) / jnp.log(10)) / 4),
+                linewidth=1,
+            )
         
         plt.title(f'Learned model, batch size $n={batch_size}$')
         plt.legend(bbox_to_anchor=(1.3, 1.0))
