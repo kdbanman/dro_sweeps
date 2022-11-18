@@ -11,6 +11,7 @@ module load python/3.9
 virtualenv env
 ln -s env/bin/activate activate
 source activate
+python -m pip install --upgrade pip
 ```
 
 On Niagara, install the dependencies via the pip index, because JAX is confusingly not available otherwise:

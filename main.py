@@ -2,8 +2,8 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from jax import random
 
-import data_generation as dg
-import dro
+import dro_sweeps.data_generation as dg
+import dro_sweeps.dro as dro
 
 
 def main():
@@ -107,9 +107,6 @@ def main():
         plt.legend(bbox_to_anchor=(1.3, 1.0))
         plt.savefig(f'plots/learned_model_{batch_size}.png')
 
-
-print('testing...')
-dro.test_cvar_batch_weights()
 
 print('running main...')
 main()

@@ -1,2 +1,4 @@
 jax[cpu]
 matplotlib
+
+-e .
