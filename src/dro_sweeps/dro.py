@@ -22,6 +22,13 @@ def cvar_batch_weights(cvar_alpha, losses):
             logging.warning(f'Batch size n={batch_size} can express a minimum cvar_alpha of ' +
                             f'1/n={1 / batch_size}, but {cvar_alpha} requested.  Defaulting to 1/n={1 / batch_size}.')
 
+        # CAUTION
+        # If cvar_alpha == 1.0, then cutoff_idx == batch_size, hence is out of bounds for assignment.
+        # jax is perfectly happy with this:
+        #   https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#out-of-bounds-indexing
+        # Don't let that path fall in here.
+        #
+        # If you change this function and that happens, existing unit tests seem to catch it.
         cutoff_idx = math.floor(cvar_alpha * batch_size)
         surplus = 1.0 - cutoff_idx / (cvar_alpha * batch_size)
 
@@ -29,18 +36,7 @@ def cvar_batch_weights(cvar_alpha, losses):
         sorted_indices = jnp.flip(jnp.argsort(losses, axis=0), axis=0)
 
         update_indices = lax.dynamic_slice(sorted_indices, (0, 0), (cutoff_idx, 1))
-
         batch_weights = batch_weights.at[update_indices].set(1.0 / (cvar_alpha * batch_size))
-
-        # CAUTION
-        # If cvar_alpha == 1.0, then cutoff_idx == batch_size, hence is out of bounds.
-        # jax is perfectly happy with this:
-        #   https://jax.readthedocs.io/en/latest/notebooks/Common_Gotchas_in_JAX.html#out-of-bounds-indexing
-        # Don't let that path fall in here.
-        #
-        # TODO ENSURE THAT TESTS CATCH THIS
-        # If you change this function and that happens,
-        # existing unit tests should catch it.
         batch_weights = batch_weights.at[sorted_indices[cutoff_idx]].set(surplus)
 
     return batch_weights
