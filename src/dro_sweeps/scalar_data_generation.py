@@ -63,3 +63,22 @@ def generate_samples(
     y = compute_noisy_outputs(noise_key, x, weights, noise_variance)
 
     return x, y
+
+
+def generate_dataset(subgroup_configs, key):
+    subgroup_inputs = []
+    subgroup_outputs = []
+    for config in subgroup_configs:
+        key, subkey = random.split(key)
+        X, Y = generate_samples(
+            config['size'],
+            config['mean'],
+            config['variance'],
+            config['weights'],
+            config['noise'],
+            subkey,
+        )
+        subgroup_inputs.append(X)
+        subgroup_outputs.append(Y)
+
+    return jnp.concatenate(subgroup_inputs), jnp.concatenate(subgroup_outputs)

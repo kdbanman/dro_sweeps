@@ -5,7 +5,7 @@ from functools import partial
 import jax.numpy as jnp
 from jax import jit, lax, random, value_and_grad
 
-import dro_sweeps.data_generation as dg
+import dro_sweeps.scalar_data_generation as dg
 
 
 @partial(jit, static_argnames='cvar_alpha')
@@ -29,6 +29,12 @@ def cvar_batch_weights(cvar_alpha, losses):
         # Don't let that path fall in here.
         #
         # If you change this function and that happens, existing unit tests seem to catch it.
+
+        # Also, this is theoretically improvable by selecting instead of sorting:
+        #   https://en.wikipedia.org/wiki/Quickselect
+        # but doing this properly in JAX/XLA could be a subtle undertaking:
+        #   https://github.com/google/jax/issues/4379
+
         cutoff_idx = math.floor(cvar_alpha * batch_size)
         surplus = 1.0 - cutoff_idx / (cvar_alpha * batch_size)
 

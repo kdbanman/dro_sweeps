@@ -2,7 +2,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from jax import random
 
-import dro_sweeps.data_generation as dg
+import dro_sweeps.scalar_data_generation as dg
 import dro_sweeps.dro as dro
 
 
@@ -70,13 +70,13 @@ def main():
         results[batch_size]['loss_trajectories'] = []
         for cvar_alpha in cvar_alphas:
             weights, loss_trajectory = dro.train_averaged_dro(
-                key, 
-                X, 
-                Y, 
-                init_weights, 
-                step_size, 
-                int(batch_size), 
-                float(cvar_alpha), 
+                key,
+                X,
+                Y,
+                init_weights,
+                step_size,
+                int(batch_size),
+                float(cvar_alpha),
                 steps,
             )
             results[batch_size]['averaged_weights'].append(weights)
@@ -121,7 +121,7 @@ def main():
                 color=plt.cm.viridis((4 + jnp.log(cvar_alpha) / jnp.log(10)) / 4),
                 linewidth=1,
             )
-        
+
         plt.title(f'Learned model, batch size $n={batch_size}$')
         plt.legend(bbox_to_anchor=(1.3, 1.0))
         plt.savefig(f'plots/learned_model_{batch_size}.png')
