@@ -1,11 +1,11 @@
 import jax.numpy as jnp
 from jax import random
 
-import dro_sweeps.scalar_data_generation as dg
+import dro_sweeps.regression_data_generation as dg
 import dro_sweeps.dro as dro
 
 
-def test_scalar_regression():
+def test_regression():
     seed = 42069
     key = random.PRNGKey(seed)
 

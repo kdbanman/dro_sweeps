@@ -1,7 +1,8 @@
 import jax.numpy as jnp
 from jax import random
 
-import dro_sweeps.scalar_data_generation as dg
+import dro_sweeps.data_generation
+import dro_sweeps.regression_data_generation as dg
 
 
 def test_shapes():
@@ -10,14 +11,14 @@ def test_shapes():
     sample = dg.sample_gaussian(key, 0, 1, 20)
     assert sample.shape == (20, 1)
 
-    inputs = dg.make_inputs(sample)
+    inputs = dro_sweeps.data_generation.make_inputs(sample)
     assert inputs.shape == (20, 2)
 
     weights = jnp.array((0.5, 0.5))
-    outputs = dg.compute_outputs(inputs, weights)
+    outputs = dro_sweeps.data_generation.linear_outputs(inputs, weights)
     assert outputs.shape == (20, 1)
 
-    noisy_outputs = dg.compute_noisy_outputs(key, inputs, weights, 1)
+    noisy_outputs = dg.noisy_linear_outputs(key, inputs, weights, 1)
     assert noisy_outputs.shape == (20, 1)
 
     x, y = dg.generate_samples(

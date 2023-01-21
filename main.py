@@ -2,7 +2,8 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from jax import random
 
-import dro_sweeps.scalar_data_generation as dg
+import dro_sweeps.data_generation
+import dro_sweeps.regression_data_generation as dg
 import dro_sweeps.dro as dro
 
 
@@ -84,7 +85,7 @@ def main():
             print(f'⍺={cvar_alpha:0.2f} ✅ ', end='')
         print('')
 
-    domain = dg.make_inputs(jnp.arange(-4, 4, 0.01))
+    domain = dro_sweeps.data_generation.make_inputs(jnp.arange(-4, 4, 0.01))
 
     for batch_size in results.keys():
         for cvar_alpha, losses in zip(cvar_alphas, results[batch_size]['loss_trajectories']):
@@ -98,7 +99,7 @@ def main():
         # plt.scatter(X_1[:, 0], Y_1, alpha=0.01, linewidths=0, s=2)
         plt.plot(
             domain[:, 0],
-            dg.compute_outputs(domain, population_1['weights']),
+            dro_sweeps.data_generation.linear_outputs(domain, population_1['weights']),
             color='blue',
             linewidth=1,
             linestyle='--',
@@ -106,7 +107,7 @@ def main():
         # plt.scatter(X_2[:, 0], Y_2, alpha=0.01, linewidths=0, s=2)
         plt.plot(
             domain[:, 0],
-            dg.compute_outputs(domain, population_2['weights']),
+            dro_sweeps.data_generation.linear_outputs(domain, population_2['weights']),
             color='orange',
             linewidth=1,
             linestyle='--',
@@ -115,7 +116,7 @@ def main():
         for cvar_alpha, weights in zip(cvar_alphas, results[batch_size]['averaged_weights']):
             plt.plot(
                 domain[:, 0],
-                dg.compute_outputs(domain, weights),
+                dro_sweeps.data_generation.linear_outputs(domain, weights),
                 alpha=0.7,
                 label=f'$\\alpha={cvar_alpha:0.4f}$',
                 color=plt.cm.viridis((4 + jnp.log(cvar_alpha) / jnp.log(10)) / 4),

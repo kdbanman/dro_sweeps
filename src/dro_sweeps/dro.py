@@ -5,7 +5,8 @@ from functools import partial
 import jax.numpy as jnp
 from jax import jit, lax, random, value_and_grad
 
-import dro_sweeps.scalar_data_generation as dg
+import dro_sweeps.data_generation
+import dro_sweeps.regression_data_generation as dg
 
 
 @partial(jit, static_argnames='cvar_alpha')
@@ -59,7 +60,7 @@ def shuffle_data(key, X, Y):
 
 
 def batch_losses(weights, X, Y):
-    predictions = dg.compute_outputs(X, weights)
+    predictions = dro_sweeps.data_generation.linear_outputs(X, weights)
     return jnp.square(Y - predictions)
 
 

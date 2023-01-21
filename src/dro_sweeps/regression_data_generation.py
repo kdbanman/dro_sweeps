@@ -2,6 +2,8 @@ import jax.numpy as jnp
 
 from jax import random
 
+from dro_sweeps.data_generation import make_inputs, linear_outputs
+
 
 def sample_gaussian(key, mean, variance, size):
     """
@@ -10,34 +12,13 @@ def sample_gaussian(key, mean, variance, size):
     return jnp.sqrt(variance) * random.normal(key, (size, 1)) + mean
 
 
-def make_inputs(x):
+def noisy_linear_outputs(key, x, weights, noise_variance):
     """
-    Assumes shape (size, 1) and appends a column of ones for bias.
-    Resulting shape is (size, 2) as per row-wise samples in a batch.
-    """
-    size = x.shape[0]
-    return jnp.hstack((
-        x.reshape((size, 1)),
-        jnp.ones_like(x).reshape((size, 1)),
-    ))
-
-
-def compute_outputs(x, weights):
-    """
-    Returns a (size, 1)-shaped array of (noiseless) outputs.
-    Each row is the dot product of the corresponding x row and weights.
-    """
-    size = x.shape[0]
-    return jnp.dot(x, weights).reshape((size, 1))
-
-
-def compute_noisy_outputs(key, x, weights, noise_variance):
-    """
-    Returns the same as compute_outputs, but with zero-mean gaussian noise
+    Returns the same as linear_outputs, but with zero-mean gaussian noise
     """
     size = x.shape[0]
     noise = jnp.sqrt(noise_variance) * random.normal(key, (size, 1))
-    return compute_outputs(x, weights) + noise
+    return linear_outputs(x, weights) + noise
 
 
 def generate_samples(
@@ -60,7 +41,7 @@ def generate_samples(
     x = sample_gaussian(x_key, x_mean, x_variance, size)
     x = make_inputs(x)
 
-    y = compute_noisy_outputs(noise_key, x, weights, noise_variance)
+    y = noisy_linear_outputs(noise_key, x, weights, noise_variance)
 
     return x, y
 
