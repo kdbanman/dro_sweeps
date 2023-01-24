@@ -53,7 +53,7 @@ def noisy_label_outputs(key, inputs, weights, noise_variance):
 def generate_samples(
         key,
         size,
-        input_mean_vector,
+        input_mean,
         input_covariance,
         weights,
         noise_variance,
@@ -61,7 +61,7 @@ def generate_samples(
     """
     :param key: PRNG key
     :param size: batch size
-    :param input_mean_vector: Center of input batch distribution.  Tuple, list, etc. with dimensionality d.
+    :param input_mean: Center of input batch distribution.  Tuple, list, etc. with dimensionality d.
     :param input_covariance: Spread of input batch distribution.  Tuples, lists, etc. with dimensionality dxd
     :param weights: Separating hyperplane params.  Tuple, list, etc. dimensionality d + 1
     :param noise_variance: Separating hyperplane noise.
@@ -70,7 +70,7 @@ def generate_samples(
     """
     inputs_key, noise_key = random.split(key)
 
-    inputs = sample_multivariate_gaussian(inputs_key, input_mean_vector, input_covariance, size)
+    inputs = sample_multivariate_gaussian(inputs_key, input_mean, input_covariance, size)
     inputs = dg.make_inputs(inputs)
 
     outputs = noisy_label_outputs(noise_key, inputs, weights, noise_variance)
@@ -83,14 +83,7 @@ def generate_dataset(key, subgroup_configs):
 
     for config in subgroup_configs:
         key, subkey = random.split(key)
-        inputs, outputs = generate_samples(
-            subkey,
-            config['size'],
-            config['input_mean'],
-            config['input_covariance'],
-            config['weights'],
-            config['noise'],
-        )
+        inputs, outputs = generate_samples(subkey, **config)
         subgroup_inputs.append(inputs)
         subgroup_outputs.append(outputs)
 

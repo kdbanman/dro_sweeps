@@ -38,7 +38,8 @@ def main():
     plt.figure(dpi=150)
     plt.scatter(X_1[:, 0], Y_1, alpha=0.01, linewidths=0, s=2)
     plt.scatter(X_2[:, 0], Y_2, alpha=0.01, linewidths=0, s=2)
-    plt.savefig('plots/populations.png')
+    plt.savefig('plots/regression_populations.png')
+    plt.clf()
 
     X = jnp.concatenate((X_1, X_2))
     Y = jnp.concatenate((Y_1, Y_2))
@@ -83,7 +84,8 @@ def main():
         plt.title(f'Weighted training step loss, batch size $n={batch_size}$')
         plt.legend(bbox_to_anchor=(1.3, 1.0))
         plt.semilogy()
-        plt.savefig(f'plots/loss_vs_steps_{batch_size}.png')
+        plt.savefig(f'plots/regression_loss_vs_steps_{batch_size}.png')
+        plt.clf()
 
         plt.figure(dpi=200)
         # plt.scatter(X_1[:, 0], Y_1, alpha=0.01, linewidths=0, s=2)
@@ -115,7 +117,8 @@ def main():
 
         plt.title(f'Learned model, batch size $n={batch_size}$')
         plt.legend(bbox_to_anchor=(1.3, 1.0))
-        plt.savefig(f'plots/learned_model_{batch_size}.png')
+        plt.savefig(f'plots/regression_learned_model_{batch_size}.png')
+        plt.clf()
 
 
 print('running main...')
