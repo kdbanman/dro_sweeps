@@ -49,65 +49,65 @@ def cvar_batch_weights(cvar_alpha, losses):
     return batch_weights
 
 
-def shuffle_data(key, X, Y):
+def shuffle_data(key, inputs, outputs):
     key, subkey = random.split(key)
 
     # Permute X, Y from the same key for identical random ordering
-    X = random.permutation(subkey, X, axis=0, independent=False)
-    Y = random.permutation(subkey, Y, axis=0, independent=False)
+    inputs = random.permutation(subkey, inputs, axis=0, independent=False)
+    outputs = random.permutation(subkey, outputs, axis=0, independent=False)
 
-    return X, Y
-
-
-def batch_losses(weights, X, Y):
-    predictions = dro_sweeps.data_generation.linear_outputs(X, weights)
-    return jnp.square(Y - predictions)
+    return inputs, outputs
 
 
-def mean_loss(weights, X, Y):
-    return jnp.mean(batch_losses(weights, X, Y))
+def batch_losses(inputs, outputs, weights):
+    predictions = dro_sweeps.data_generation.linear_outputs(inputs, weights)
+    return jnp.square(outputs - predictions)
 
 
-def weighted_loss(weights, batch_weights, X, Y):
-    losses = batch_losses(weights, X, Y)
+def mean_loss(inputs, outputs, weights):
+    return jnp.mean(batch_losses(inputs, outputs, weights))
+
+
+def weighted_loss(inputs, outputs, weights, batch_weights):
+    losses = batch_losses(inputs, outputs, weights)
     return jnp.sum(losses * batch_weights)
 
 
 @partial(jit, static_argnames=('step_size', 'cvar_alpha'))
-def dro_update(weights, X, Y, step_size, cvar_alpha):
-    losses = batch_losses(weights, X, Y)
+def dro_update(inputs, outputs, weights, step_size, cvar_alpha):
+    losses = batch_losses(inputs, outputs, weights)
     batch_weights = cvar_batch_weights(cvar_alpha, losses)
 
-    loss, grads = value_and_grad(weighted_loss)(weights, batch_weights, X, Y)
+    loss, grads = value_and_grad(weighted_loss, argnums=2)(inputs, outputs, weights, batch_weights)
 
     return weights - step_size * grads, loss
 
 
-def batches(X, batch_size):
+def batches(inputs, batch_size):
     """
     Yields each batch as an iterator.
 
-    Cases with X.shape[0] := N and batch_size := n
+    Cases with inputs.shape[0] := N and batch_size := n
 
     - N % n == 0: N/n minibatches yielded, each size n
     - N % n == m: ⌈N/n⌉ minibatches yielded, all size n except final size m
     """
-    num_samples = X.shape[0]
+    num_samples = inputs.shape[0]
     num_batches = num_samples // batch_size
 
-    X_head = X[:num_batches * batch_size]
+    inputs_head = inputs[:num_batches * batch_size]
 
-    X_batches = X_head.reshape((num_batches, batch_size, X_head.shape[1]))
+    inputs_batches = inputs_head.reshape((num_batches, batch_size, inputs_head.shape[1]))
 
-    for batch in X_batches:
+    for batch in inputs_batches:
         yield batch
 
     if num_samples % batch_size != 0:
-        final_batch = X[-(num_samples % batch_size):]
+        final_batch = inputs[-(num_samples % batch_size):]
         yield final_batch
 
 
-def train_averaged_dro(key, X, Y, weights, step_size, batch_size, cvar_alpha, steps):
+def train_averaged_dro(key, inputs, outputs, weights, step_size, batch_size, cvar_alpha, steps):
     """
     optimize weights by DRO w/ ⍺-CVar (⍺=0 is conventional SGD)
     return weights averaged across final half of steps
@@ -123,13 +123,13 @@ def train_averaged_dro(key, X, Y, weights, step_size, batch_size, cvar_alpha, st
     mean_weights = weights
     while step < steps:
         key, subkey = random.split(key)
-        X, Y = shuffle_data(subkey, X, Y)
-        X_batches = batches(X, batch_size)
-        Y_batches = batches(Y, batch_size)
-        for batch_X, batch_Y in zip(X_batches, Y_batches):
+        inputs, outputs = shuffle_data(subkey, inputs, outputs)
+        inputs_batches = batches(inputs, batch_size)
+        outputs_batches = batches(outputs, batch_size)
+        for input_batch, output_batch in zip(inputs_batches, outputs_batches):
             step += 1
 
-            weights, loss = dro_update(weights, batch_X, batch_Y, step_size, cvar_alpha)
+            weights, loss = dro_update(input_batch, output_batch, weights, step_size, cvar_alpha)
             loss_trajectory.append(loss)
 
             mean_weights = (1 - 2 / (step + 2)) * mean_weights + 2 / (step + 2) * weights

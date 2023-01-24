@@ -70,10 +70,10 @@ def generate_samples(
     """
     inputs_key, noise_key = random.split(key)
 
-    inputs = sample_multivariate_gaussian(key, input_mean_vector, input_covariance, size)
+    inputs = sample_multivariate_gaussian(inputs_key, input_mean_vector, input_covariance, size)
     inputs = dg.make_inputs(inputs)
 
-    outputs = noisy_label_outputs(key, inputs, weights, noise_variance)
+    outputs = noisy_label_outputs(noise_key, inputs, weights, noise_variance)
     return inputs, outputs
 
 
@@ -95,8 +95,3 @@ def generate_dataset(key, subgroup_configs):
         subgroup_outputs.append(outputs)
 
     return jnp.concatenate(subgroup_inputs), jnp.concatenate(subgroup_outputs)
-
-
-## TODO
-# - add a classification main.py to test with figures
-# - move to test classification integration test file

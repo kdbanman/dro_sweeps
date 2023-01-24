@@ -21,13 +21,6 @@ def test_shapes():
     noisy_outputs = dg.noisy_linear_outputs(key, inputs, weights, 1)
     assert noisy_outputs.shape == (20, 1)
 
-    x, y = dg.generate_samples(
-        20,
-        0,
-        1,
-        jnp.array((0.5, 0.5)),
-        0.1,
-        key,
-    )
+    x, y = dg.generate_samples(key, 0, 1, 20, jnp.array((0.5, 0.5)), 0.1)
     assert x.shape == (20, 2)
     assert y.shape == (20, 1)

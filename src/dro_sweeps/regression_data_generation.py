@@ -5,54 +5,45 @@ from jax import random
 from dro_sweeps.data_generation import make_inputs, linear_outputs, sample_gaussian
 
 
-def noisy_linear_outputs(key, x, weights, noise_variance):
+def noisy_linear_outputs(key, inputs, weights, noise_variance):
     """
     Returns the same as linear_outputs, but with zero-mean gaussian noise
     """
-    size = x.shape[0]
+    size = inputs.shape[0]
     noise = jnp.sqrt(noise_variance) * random.normal(key, (size, 1))
-    return linear_outputs(x, weights) + noise
+    return linear_outputs(inputs, weights) + noise
 
 
-def generate_samples(
-        size,
-        x_mean,
-        x_variance,
-        weights,
-        noise_variance,
-        key,
-):
+def generate_samples(key, input_mean, input_variance, size, weights, noise_variance):
     """
-    Returns (x, y) tuple
-    x are scalar inputs padded by ones: x.shape == (size, 2)
-    y are scalar outputs: y.shape == (size)
-    x are gaussian
-    y are a gaussian-noised linear function of x according to weights
+    Returns (inputs, outputs) tuple
+    inputs are scalars padded by ones: inputs.shape == (size, 2), gaussian
+    outputs are scalars: outputs.shape == (size), gaussian-noised linear
     """
-    x_key, noise_key = random.split(key)
+    inputs_key, noise_key = random.split(key)
 
-    x = sample_gaussian(x_key, x_mean, x_variance, size)
-    x = make_inputs(x)
+    inputs = sample_gaussian(inputs_key, input_mean, input_variance, size)
+    inputs = make_inputs(inputs)
 
-    y = noisy_linear_outputs(noise_key, x, weights, noise_variance)
+    outputs = noisy_linear_outputs(noise_key, inputs, weights, noise_variance)
 
-    return x, y
+    return inputs, outputs
 
 
-def generate_dataset(subgroup_configs, key):
+def generate_dataset(key, subgroup_configs):
     subgroup_inputs = []
     subgroup_outputs = []
     for config in subgroup_configs:
         key, subkey = random.split(key)
-        X, Y = generate_samples(
-            config['size'],
+        inputs, outputs = generate_samples(
+            subkey,
             config['mean'],
             config['variance'],
+            config['size'],
             config['weights'],
             config['noise'],
-            subkey,
         )
-        subgroup_inputs.append(X)
-        subgroup_outputs.append(Y)
+        subgroup_inputs.append(inputs)
+        subgroup_outputs.append(outputs)
 
     return jnp.concatenate(subgroup_inputs), jnp.concatenate(subgroup_outputs)

@@ -32,15 +32,16 @@ def test_regression():
     init_weights = jnp.array((0.1, 0.1)).reshape((2, 1))
 
     key, subkey = random.split(key)
-    X, Y = dg.generate_dataset([population_1, population_2], key)
+    inputs, outputs = dg.generate_dataset(subkey, [population_1, population_2])
 
+    key, subkey = random.split(key)
     _weights, _loss_trajectory = dro.train_averaged_dro(
-        key,
-        X,
-        Y,
+        subkey,
+        inputs,
+        outputs,
         init_weights,
         step_size,
-        int(batch_size),
-        float(cvar_alpha),
+        batch_size,
+        cvar_alpha,
         steps,
     )

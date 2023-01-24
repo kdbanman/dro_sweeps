@@ -28,24 +28,12 @@ def main():
     key = random.PRNGKey(seed)
 
     key, subkey = random.split(key)
-    X_1, Y_1 = dg.generate_samples(
-        population_1['size'],
-        population_1['mean'],
-        population_1['variance'],
-        population_1['weights'],
-        population_1['noise'],
-        subkey,
-    )
+    X_1, Y_1 = dg.generate_samples(subkey, population_1['mean'], population_1['variance'], population_1['size'],
+                                   population_1['weights'], population_1['noise'])
 
     key, subkey = random.split(key)
-    X_2, Y_2 = dg.generate_samples(
-        population_2['size'],
-        population_2['mean'],
-        population_2['variance'],
-        population_2['weights'],
-        population_2['noise'],
-        subkey,
-    )
+    X_2, Y_2 = dg.generate_samples(subkey, population_2['mean'], population_2['variance'], population_2['size'],
+                                   population_2['weights'], population_2['noise'])
 
     plt.figure(dpi=150)
     plt.scatter(X_1[:, 0], Y_1, alpha=0.01, linewidths=0, s=2)
