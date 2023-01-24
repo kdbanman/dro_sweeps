@@ -2,14 +2,7 @@ import jax.numpy as jnp
 
 from jax import random
 
-from dro_sweeps.data_generation import make_inputs, linear_outputs
-
-
-def sample_gaussian(key, mean, variance, size):
-    """
-    Returns 1d array of gaussian samples of shape (size, 1)
-    """
-    return jnp.sqrt(variance) * random.normal(key, (size, 1)) + mean
+from dro_sweeps.data_generation import make_inputs, linear_outputs, sample_gaussian
 
 
 def noisy_linear_outputs(key, x, weights, noise_variance):

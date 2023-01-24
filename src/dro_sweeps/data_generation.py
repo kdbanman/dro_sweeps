@@ -1,4 +1,4 @@
-from jax import numpy as jnp
+from jax import numpy as jnp, random
 
 
 def make_inputs(x):
@@ -20,3 +20,10 @@ def linear_outputs(x, weights):
     """
     size = x.shape[0]
     return jnp.dot(x, weights).reshape((size, 1))
+
+
+def sample_gaussian(key, mean, variance, size):
+    """
+    Returns 1d array of gaussian samples of shape (size, 1)
+    """
+    return jnp.sqrt(variance) * random.normal(key, (size, 1)) + mean

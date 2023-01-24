@@ -8,7 +8,7 @@ import dro_sweeps.regression_data_generation as dg
 def test_shapes():
     key = random.PRNGKey(420)
 
-    sample = dg.sample_gaussian(key, 0, 1, 20)
+    sample = dro_sweeps.data_generation.sample_gaussian(key, 0, 1, 20)
     assert sample.shape == (20, 1)
 
     inputs = dro_sweeps.data_generation.make_inputs(sample)
