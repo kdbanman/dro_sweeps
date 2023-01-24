@@ -40,6 +40,8 @@ def test_regression():
         inputs,
         outputs,
         init_weights,
+        dg.linear_outputs,
+        dro.squared_err_loss,
         step_size,
         batch_size,
         cvar_alpha,

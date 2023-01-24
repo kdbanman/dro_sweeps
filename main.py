@@ -63,6 +63,8 @@ def main():
                 X,
                 Y,
                 init_weights,
+                dg.linear_outputs,
+                dro.squared_err_loss,
                 step_size,
                 int(batch_size),
                 float(cvar_alpha),
@@ -73,7 +75,7 @@ def main():
             print(f'⍺={cvar_alpha:0.2f} ✅ ', end='')
         print('')
 
-    domain = dro_sweeps.data_generation.make_inputs(jnp.arange(-4, 4, 0.01))
+    domain = dro_sweeps.data_generation.make_inputs(jnp.arange(-4, 4, 0.01).reshape((-1, 1)))
 
     for batch_size in results.keys():
         for cvar_alpha, losses in zip(cvar_alphas, results[batch_size]['loss_trajectories']):

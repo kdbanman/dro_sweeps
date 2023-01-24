@@ -16,7 +16,6 @@ pip install -r requirements.txt
 
 # TODO
 
-- Make loss function a parameter of `dro_update`, probably changing to a (predictions, labels) pattern instead of extant (inputs, weights, labels) pattern.
 - add a classification main.py to test with figures
 - move to test classification integration test file
 - Support `weights` that are just tuples, rather than jnp.arrays, so that the functions are responsible for shape, etc.

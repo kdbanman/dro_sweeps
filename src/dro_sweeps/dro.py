@@ -5,9 +5,6 @@ from functools import partial
 import jax.numpy as jnp
 from jax import jit, lax, random, value_and_grad
 
-import dro_sweeps.data_generation
-import dro_sweeps.regression_data_generation as dg
-
 
 @partial(jit, static_argnames='cvar_alpha')
 def cvar_batch_weights(cvar_alpha, losses):
@@ -59,26 +56,27 @@ def shuffle_data(key, inputs, outputs):
     return inputs, outputs
 
 
-def batch_losses(inputs, outputs, weights):
-    predictions = dro_sweeps.data_generation.linear_outputs(inputs, weights)
+def squared_err_loss(predictions, outputs):
     return jnp.square(outputs - predictions)
 
 
-def mean_loss(inputs, outputs, weights):
-    return jnp.mean(batch_losses(inputs, outputs, weights))
+def cross_entropy_loss(predictions, outputs):
+    return None
 
 
-def weighted_loss(inputs, outputs, weights, batch_weights):
-    losses = batch_losses(inputs, outputs, weights)
+def weighted_loss(inputs, outputs, weights, predict_fn, loss_fn, batch_weights):
+    predictions = predict_fn(inputs, weights)
+    losses = loss_fn(predictions, outputs)
     return jnp.sum(losses * batch_weights)
 
 
-@partial(jit, static_argnames=('step_size', 'cvar_alpha'))
-def dro_update(inputs, outputs, weights, step_size, cvar_alpha):
-    losses = batch_losses(inputs, outputs, weights)
+@partial(jit, static_argnames=('predict_fn', 'loss_fn', 'step_size', 'cvar_alpha'))
+def dro_update(inputs, outputs, weights, predict_fn, loss_fn, step_size, cvar_alpha):
+    predictions = predict_fn(inputs, weights)
+    losses = loss_fn(predictions, outputs)
     batch_weights = cvar_batch_weights(cvar_alpha, losses)
 
-    loss, grads = value_and_grad(weighted_loss, argnums=2)(inputs, outputs, weights, batch_weights)
+    loss, grads = value_and_grad(weighted_loss, argnums=2)(inputs, outputs, weights, predict_fn, loss_fn, batch_weights)
 
     return weights - step_size * grads, loss
 
@@ -107,7 +105,7 @@ def batches(inputs, batch_size):
         yield final_batch
 
 
-def train_averaged_dro(key, inputs, outputs, weights, step_size, batch_size, cvar_alpha, steps):
+def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_size, batch_size, cvar_alpha, steps):
     """
     optimize weights by DRO w/ ⍺-CVar (⍺=0 is conventional SGD)
     return weights averaged across final half of steps
@@ -129,7 +127,7 @@ def train_averaged_dro(key, inputs, outputs, weights, step_size, batch_size, cva
         for input_batch, output_batch in zip(inputs_batches, outputs_batches):
             step += 1
 
-            weights, loss = dro_update(input_batch, output_batch, weights, step_size, cvar_alpha)
+            weights, loss = dro_update(input_batch, output_batch, weights, predict_fn, loss_fn, step_size, cvar_alpha)
             loss_trajectory.append(loss)
 
             mean_weights = (1 - 2 / (step + 2)) * mean_weights + 2 / (step + 2) * weights
