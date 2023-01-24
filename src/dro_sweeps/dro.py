@@ -61,7 +61,7 @@ def squared_err_loss(predictions, outputs):
 
 
 def cross_entropy_loss(predictions, outputs):
-    return None
+    return -outputs * jnp.log(predictions) - (1 - outputs) * jnp.log(1 - predictions)
 
 
 def weighted_loss(inputs, outputs, weights, predict_fn, loss_fn, batch_weights):
