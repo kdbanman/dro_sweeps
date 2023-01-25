@@ -57,6 +57,7 @@ def generate_samples(
         input_covariance,
         weights,
         noise_variance,
+        **kwargs,
 ):
     """
     :param key: PRNG key
