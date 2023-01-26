@@ -35,7 +35,7 @@ def test_regression():
     inputs, outputs = dg.generate_dataset(subkey, [population_1, population_2])
 
     key, subkey = random.split(key)
-    _weights, _loss_trajectory = dro.train_averaged_dro(
+    _weights, _loss_trajectory, _log_steps = dro.train_averaged_dro(
         subkey,
         inputs,
         outputs,
@@ -46,4 +46,5 @@ def test_regression():
         batch_size,
         cvar_alpha,
         steps,
+        10,
     )

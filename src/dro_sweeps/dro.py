@@ -105,7 +105,7 @@ def batches(inputs, batch_size):
         yield final_batch
 
 
-def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_size, batch_size, cvar_alpha, steps):
+def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_size, batch_size, cvar_alpha, steps, log_period):
     """
     optimize weights by DRO w/ ⍺-CVar (⍺=0 is conventional SGD)
     return weights averaged across final half of steps
@@ -117,6 +117,7 @@ def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_
     regularized objectives.
     """
     loss_trajectory = []
+    log_steps = []
     step = 0
     mean_weights = weights
     while step < steps:
@@ -125,13 +126,15 @@ def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_
         inputs_batches = batches(inputs, batch_size)
         outputs_batches = batches(outputs, batch_size)
         for input_batch, output_batch in zip(inputs_batches, outputs_batches):
-            step += 1
-
             weights, loss = dro_update(input_batch, output_batch, weights, predict_fn, loss_fn, step_size, cvar_alpha)
-            loss_trajectory.append(loss)
 
+            if step % log_period == 0:
+                loss_trajectory.append(loss)
+                log_steps.append(step)
+
+            step += 1
             mean_weights = (1 - 2 / (step + 2)) * mean_weights + 2 / (step + 2) * weights
 
             if step >= steps:
                 break
-    return weights, loss_trajectory
+    return weights, loss_trajectory, log_steps

@@ -34,7 +34,7 @@ def test_classification():
     key, subkey = random.split(key)
     inputs, labels = cdg.generate_dataset(key, [population_1, population_2])
 
-    _weights, _loss_trajectory = dro.train_averaged_dro(
+    _weights, _loss_trajectory, _log_steps = dro.train_averaged_dro(
         subkey,
         inputs,
         labels,
@@ -45,4 +45,5 @@ def test_classification():
         batch_size,
         cvar_alpha,
         steps,
+        10,
     )

@@ -51,6 +51,9 @@ def main():
     step_size = 0.005
     init_weights = jnp.array((0.1, 0.1)).reshape((2, 1))
 
+    max_log_samples = 200
+    log_period = steps // max_log_samples
+
     results = {}
     for batch_size in batch_sizes:
         print(f'Sweeping batch size {batch_size}...')
@@ -58,8 +61,9 @@ def main():
         results[batch_size] = {}
         results[batch_size]['averaged_weights'] = []
         results[batch_size]['loss_trajectories'] = []
+        results[batch_size]['log_steps'] = []
         for cvar_alpha in cvar_alphas:
-            weights, loss_trajectory = dro.train_averaged_dro(
+            weights, loss_trajectory, log_steps = dro.train_averaged_dro(
                 key,
                 X,
                 Y,
@@ -70,17 +74,19 @@ def main():
                 int(batch_size),
                 float(cvar_alpha),
                 steps,
+                log_period,
             )
             results[batch_size]['averaged_weights'].append(weights)
             results[batch_size]['loss_trajectories'].append(loss_trajectory)
+            results[batch_size]['log_steps'].append(log_steps)
             print(f'⍺={cvar_alpha:0.2f} ✅ ', end='')
         print('')
 
     domain = dro_sweeps.data_generation.make_inputs(jnp.arange(-4, 4, 0.01).reshape((-1, 1)))
 
     for batch_size in results.keys():
-        for cvar_alpha, losses in zip(cvar_alphas, results[batch_size]['loss_trajectories']):
-            plt.plot(losses, alpha=0.5, label=f'$\\alpha={cvar_alpha:0.3f}$', color=plt.cm.cividis(cvar_alpha))
+        for cvar_alpha, losses, log_steps in zip(cvar_alphas, results[batch_size]['loss_trajectories'], results[batch_size]['log_steps']):
+            plt.plot(log_steps, losses, alpha=0.5, label=f'$\\alpha={cvar_alpha:0.3f}$', color=plt.cm.cividis(cvar_alpha))
         plt.title(f'Weighted training step loss, batch size $n={batch_size}$')
         plt.legend(bbox_to_anchor=(1.3, 1.0))
         plt.semilogy()
