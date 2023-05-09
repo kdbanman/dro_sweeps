@@ -16,19 +16,22 @@ pip install -r requirements.txt
 
 # TODO
 
+## Bugs
+
+- why do we get NaN gradients with the current setup for `classification_example.ipynb`
+- remove debugging TODO comments once solved
+
 ## New Investment
 
 - create `results = run(params)` type function
+- create _objects_ or _dicts_ to encapsulate model, training config, training results
 - save results to csv
 - make runner which runs `run` if results not exist
 - sweep in detail with overzealous training steps
 - results in postgres
 
-## Bugs
-
-- why don't we learn the right classifier?
-
 ## Debt
+
 - change `outputs` to `labels` in places dro.py and upstream places.
 - add plotting source file from classification example notebook functions.
 - make imports consistent across all files.

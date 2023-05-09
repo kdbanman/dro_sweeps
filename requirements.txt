@@ -1,5 +1,6 @@
 pytest
 jupyter
+scikit-learn
 
 jax[cpu]
 matplotlib

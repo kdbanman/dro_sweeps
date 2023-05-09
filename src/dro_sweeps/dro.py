@@ -69,8 +69,8 @@ def weighted_loss(inputs, outputs, weights, predict_fn, loss_fn, batch_weights):
     losses = loss_fn(predictions, outputs)
     return jnp.sum(losses * batch_weights)
 
-
-@partial(jit, static_argnames=('predict_fn', 'loss_fn', 'step_size', 'cvar_alpha'))
+#TODO undo comment
+# @partial(jit, static_argnames=('predict_fn', 'loss_fn', 'step_size', 'cvar_alpha'))
 def dro_update(inputs, outputs, weights, predict_fn, loss_fn, step_size, cvar_alpha):
     predictions = predict_fn(inputs, weights)
     losses = loss_fn(predictions, outputs)
@@ -126,7 +126,14 @@ def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_
         inputs_batches = batches(inputs, batch_size)
         outputs_batches = batches(outputs, batch_size)
         for input_batch, output_batch in zip(inputs_batches, outputs_batches):
-            weights, loss = dro_update(input_batch, output_batch, weights, predict_fn, loss_fn, step_size, cvar_alpha)
+            new_weights, loss = dro_update(input_batch, output_batch, weights, predict_fn, loss_fn, step_size, cvar_alpha)
+
+            if jnp.any(jnp.isnan(new_weights)):
+                logging.warning(f'NaN weights encountered from old weights: {weights}')
+                step = steps
+                break
+            else:
+                weights = new_weights
 
             if step % log_period == 0:
                 loss_trajectory.append(loss)
