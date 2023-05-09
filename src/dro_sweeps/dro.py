@@ -107,7 +107,7 @@ def batches(inputs, batch_size):
 
 def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_size, batch_size, cvar_alpha, steps, log_period):
     """
-    optimize weights by DRO w/ ⍺-CVar (⍺=0 is conventional SGD)
+    optimize weights by DRO w/ ⍺-CVar (⍺=1.0 is conventional SGD)
     return weights averaged across final half of steps
 
     Averaging scheme as per https://arxiv.org/abs/1212.2002
