@@ -21,8 +21,17 @@ def sample_multivariate_gaussian(key, mean_vector, covariance, size):
     return batch
 
 
-def logistic_function(scalar_inputs):
-    return 1 / (1 + jnp.exp(-scalar_inputs))
+def logistic_function(scalar_inputs, epsilon=1e-6):
+    """
+
+    :param scalar_inputs: Numerical or array-like input to logistic function.
+    :param epsilon: Threshold to maintain away from saturation to exact zero or one.
+    :return: Element-wise logistic function value, nonsaturated according to epsilon.
+    """
+    raw_logits = 1 / (1 + jnp.exp(-scalar_inputs))
+
+    unsaturated_logits = jnp.maximum(jnp.minimum(raw_logits, 1.0 - epsilon), epsilon)
+    return unsaturated_logits
 
 
 def logistic_outputs(inputs, weights):

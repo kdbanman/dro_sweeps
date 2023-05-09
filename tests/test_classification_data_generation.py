@@ -46,3 +46,15 @@ def test_ranges(linear_separated_data):
 
     assert jnp.alltrue(jnp.logical_or(labels == 1., labels == 0.))
     assert jnp.alltrue(jnp.logical_or(noisy_labels == 1., noisy_labels == 0.))
+
+
+def test_nonzero_nonunity():
+    # Due to roundoff errors, it's possible that a naive implementation of the
+    # logistic function will fully saturate.  This breaks crossentropy loss, so
+    # we need to avoid it.
+    large_scalar = 1e6
+    nonzero_logit = cdg.logistic_function(-large_scalar)
+    nonunity_logit = cdg.logistic_function(large_scalar)
+
+    assert nonzero_logit > 0.0
+    assert nonunity_logit < 1.0
