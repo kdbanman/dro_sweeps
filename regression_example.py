@@ -63,7 +63,7 @@ def main():
         results[batch_size]['loss_trajectories'] = []
         results[batch_size]['log_steps'] = []
         for cvar_alpha in cvar_alphas:
-            weights, loss_trajectory, log_steps = dro.train_averaged_dro(
+            training_results = dro.train_averaged_dro(
                 key,
                 X,
                 Y,
@@ -76,9 +76,9 @@ def main():
                 steps,
                 log_period,
             )
-            results[batch_size]['averaged_weights'].append(weights)
-            results[batch_size]['loss_trajectories'].append(loss_trajectory)
-            results[batch_size]['log_steps'].append(log_steps)
+            results[batch_size]['averaged_weights'].append(training_results.averaged_weights)
+            results[batch_size]['loss_trajectories'].append(training_results.loss_trajectory)
+            results[batch_size]['log_steps'].append(training_results.log_steps)
             print(f'⍺={cvar_alpha:0.2f} ✅ ', end='')
         print('')
 

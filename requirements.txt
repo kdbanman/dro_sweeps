@@ -4,5 +4,7 @@ scikit-learn
 
 jax[cpu]
 matplotlib
+tqdm
+wandb
 
 -e .

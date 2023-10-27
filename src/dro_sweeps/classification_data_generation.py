@@ -23,6 +23,7 @@ def sample_multivariate_gaussian(key, mean_vector, covariance, size):
 
 def logistic_function(scalar_inputs, epsilon=1e-6):
     """
+    TODO: How much does the desaturating max and min operation affect compute efficiency?
 
     :param scalar_inputs: Numerical or array-like input to logistic function.
     :param epsilon: Threshold to maintain away from saturation to exact zero or one.

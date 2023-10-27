@@ -41,7 +41,7 @@ def test_classification_cvar_smoke_test():
     key, subkey = random.split(key)
     inputs, labels = cdg.generate_dataset(key, [population_1, population_2])
 
-    _weights, _loss_trajectory, _log_steps = dro.train_averaged_dro(
+    _training_results = dro.train_averaged_dro(
         subkey,
         inputs,
         labels,
@@ -62,44 +62,43 @@ def test_classification_sgd_correctness():
     regression to the sgd configuration (i.e. CVaR with alpha = 0).
     """
 
-    seed = 42069
-    key = random.PRNGKey(seed)
-    key, subkey = random.split(key)
-    inputs, labels = cdg.generate_dataset(subkey, [{
-        'size': 500,
-        'input_mean': (1.0, 1.0),
-        'input_covariance': ((1.0, 0.0), (0.0, 1.0)),
-        'weights': jnp.array((0.5, 0.5, 0.5)),
-        'noise_variance': 0.001,
-    }])
+    # TODO finish this test.  The weights can be different because inifinitely
+    #      many planes separate the classes
 
-    reference_model = LogisticRegression(
-        random_state=0,
-        tol=1e-7,
-        fit_intercept=False,
-        C=1.0,
-        max_iter=1000
-    ).fit(inputs, labels)
-
-    steps = 1e5
-    step_size = 1e-3
-    init_weights = jnp.array([0.1, 0.1, 0.1]).reshape((3, 1))
-
-    key, subkey = random.split(key)
-    weights, _loss_trajectory, _log_steps = dro.train_averaged_dro(
-        key,
-        inputs,
-        labels,
-        init_weights,
-        cdg.logistic_outputs,
-        dro.cross_entropy_loss,
-        step_size,
-        inputs.shape[1],
-        1.0,
-        steps,
-        10,
-    )
-
-    print(weights)
-    print(reference_model.coef_)
-    print('')
+    # seed = 42069
+    # key = random.PRNGKey(seed)
+    # key, subkey = random.split(key)
+    # inputs, labels = cdg.generate_dataset(subkey, [{
+    #     'size': 500,
+    #     'input_mean': (1.0, 1.0),
+    #     'input_covariance': ((1.0, 0.0), (0.0, 1.0)),
+    #     'weights': jnp.array((0.5, 0.5, 0.5)),
+    #     'noise_variance': 0.001,
+    # }])
+    #
+    # reference_model = LogisticRegression(
+    #     random_state=0,
+    #     tol=1e-7,
+    #     fit_intercept=False,
+    #     C=1.0,
+    #     max_iter=1000
+    # ).fit(inputs, labels)
+    #
+    # steps = 1e4
+    # step_size = 1e-1
+    # init_weights = jnp.array([0.1, 0.1, 0.1]).reshape((3, 1))
+    #
+    # key, subkey = random.split(key)
+    # _training_results = dro.train_averaged_dro(
+    #     key,
+    #     inputs,
+    #     labels,
+    #     init_weights,
+    #     cdg.logistic_outputs,
+    #     dro.cross_entropy_loss,
+    #     step_size,
+    #     inputs.shape[1],
+    #     1.0,
+    #     steps,
+    #     10,
+    # )

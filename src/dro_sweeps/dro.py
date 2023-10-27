@@ -5,6 +5,8 @@ from functools import partial
 import jax.numpy as jnp
 from jax import jit, lax, random, value_and_grad
 
+from dro_sweeps.training_results import TrainingResults
+
 
 @partial(jit, static_argnames='cvar_alpha')
 def cvar_batch_weights(cvar_alpha, losses):
@@ -69,8 +71,8 @@ def weighted_loss(inputs, outputs, weights, predict_fn, loss_fn, batch_weights):
     losses = loss_fn(predictions, outputs)
     return jnp.sum(losses * batch_weights)
 
-#TODO undo comment
-# @partial(jit, static_argnames=('predict_fn', 'loss_fn', 'step_size', 'cvar_alpha'))
+
+@partial(jit, static_argnames=('predict_fn', 'loss_fn', 'step_size', 'cvar_alpha'))
 def dro_update(inputs, outputs, weights, predict_fn, loss_fn, step_size, cvar_alpha):
     predictions = predict_fn(inputs, weights)
     losses = loss_fn(predictions, outputs)
@@ -105,21 +107,18 @@ def batches(inputs, batch_size):
         yield final_batch
 
 
-def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_size, batch_size, cvar_alpha, steps, log_period):
+def train_averaged_dro(key, inputs, outputs, init_weights, predict_fn, loss_fn, step_size, batch_size, cvar_alpha, steps, log_period, results_logger):
     """
     optimize weights by DRO w/ ⍺-CVar (⍺=1.0 is conventional SGD)
     return weights averaged across final half of steps
 
-    Averaging scheme as per https://arxiv.org/abs/1212.2002
-
     NOTE: Not using momentum acceleration, because "the accelerated guarantees require
     the loss to have order 1/eps-Lipschitz gradients" which only holds for the
-    regularized objectives.
+    regularized objectives.  See Large Scale DRO, Levy et al. page 7
     """
-    loss_trajectory = []
-    log_steps = []
+    results = TrainingResults(log_period, init_weights, results_logger)
     step = 0
-    mean_weights = weights
+    weights = init_weights
     while step < steps:
         key, subkey = random.split(key)
         inputs, outputs = shuffle_data(subkey, inputs, outputs)
@@ -135,13 +134,10 @@ def train_averaged_dro(key, inputs, outputs, weights, predict_fn, loss_fn, step_
             else:
                 weights = new_weights
 
-            if step % log_period == 0:
-                loss_trajectory.append(loss)
-                log_steps.append(step)
+            results.record_step(step, loss, weights)
 
             step += 1
-            mean_weights = (1 - 2 / (step + 2)) * mean_weights + 2 / (step + 2) * weights
 
             if step >= steps:
                 break
-    return weights, loss_trajectory, log_steps
+    return results
