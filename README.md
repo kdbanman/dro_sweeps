@@ -14,6 +14,12 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+## Usage
+
+The `dro_sweeps/` directory contains the important source code, including a performant minibatch implementation of CVaR DRO, as well as synthtetic fairness data generation.
+
+The `classification_example.ipynb` and `regression_exmaple.py` files contain classification and regression examples using ^that source code.  From those, it should be clear how hyperparameter sweeps work for classification and regression.
+
 # TODO
 
 ## Bugs
